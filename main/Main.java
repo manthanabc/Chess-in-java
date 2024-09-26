@@ -18,33 +18,57 @@ public class Main {
     chess.pack();
     chess.setLocationRelativeTo(null);
     chess.setVisible(true);
-    boardPanel.launch();
+    boardPanel.launchClient();
   }
 
 }
 
-class MainPanel extends JPanel implements Runnable {
+class MainPanel extends JPanel {
 
   public static final int WIDTH = Board.SQUARE_SIZE * Board.MAX_COL;
   public static final int HEIGHT = Board.SQUARE_SIZE * Board.MAX_ROW;
+  public MyMouse mouse;
+  public Game game;
+
+  public MainPanel() {
+    mouse = new MyMouse();
+    game = new Game(this, mouse);
+    setPreferredSize((new Dimension(WIDTH, HEIGHT)));
+    setBackground(Color.WHITE);
+    addMouseListener(mouse);
+    addMouseMotionListener(mouse);
+  }
+
+  public void launchClient() {
+    game.launch();
+    // chat.launch();
+  }
+
+  public void paintComponent(Graphics g) {
+    super.paintComponent(g);
+    Graphics2D g2d = (Graphics2D) g;
+    game.render(g2d);
+  }
+}
+
+class Game implements Runnable {
   private final int TARGET_FPS = 100;
   private final int FRAME_TIME = 1000 / TARGET_FPS;
   private boolean running;
   private Thread gameThread;
   public Board board;
   public ArrayList<ChessPiece> pieces = new ArrayList<>();
-  public MyMouse mouse = new MyMouse();
+  public MyMouse mouse;
   public ChessPiece activePiece;
   public boolean check;
   public boolean turn = true;
   public static int moveNumber = 0;
+  public MainPanel boardPanel;
 
-  public MainPanel() {
-    setPreferredSize((new Dimension(WIDTH, HEIGHT)));
-    setBackground(Color.WHITE);
-    addMouseListener(mouse);
-    addMouseMotionListener(mouse);
-    board = new Board();
+  public Game(MainPanel boardPanel, MyMouse mouse) {
+    this.mouse = mouse;
+    board = new Board(pieces);
+    this.boardPanel = boardPanel;
   }
 
   public synchronized void launch() {
@@ -60,115 +84,82 @@ class MainPanel extends JPanel implements Runnable {
     setPieces();
   }
 
-  public void drawPieces(Graphics2D g2d) {
-    synchronized (pieces) {
-      for (ChessPiece piece : pieces) {
-        piece.draw(g2d);
-      }
-      if (activePiece != null)
-        activePiece.draw(g2d);
-    }
-  }
-
   public void setPieces() {
+    boolean color;
+    ChessPiece p;
     synchronized (pieces) {
-      boolean color = false;
-      for (int i = 0; i < Board.MAX_COL; i++) {
-        pieces.add(new PawnPiece(color, 1, i));
+      color = false; // set white pieces
+      for (int i = 0; i < Board.MAX_COL; i++) { // set white pawns
+        p = new PawnPiece(color, 1, i, board);
+        pieces.add(p);
+        board.state[1][i] = p;
       }
-      pieces.add(new KingPiece(color, 0, 4));
-      pieces.add(new QueenPiece(color, 0, 3));
-      pieces.add(new RookPiece(color, 0, 0));
-      pieces.add(new RookPiece(color, 0, 7));
-      pieces.add(new KnightPiece(color, 0, 1));
-      pieces.add(new KnightPiece(color, 0, 6));
-      pieces.add(new BishopPiece(color, 0, 2));
-      pieces.add(new BishopPiece(color, 0, 5));
-      color = true;
-      for (int i = 0; i < Board.MAX_COL; i++) {
-        pieces.add(new PawnPiece(color, 6, i));
+      pieces.add(p = new KingPiece(color, 0, 4, board));
+      board.state[0][4] = p;
+      pieces.add(p = new QueenPiece(color, 0, 3, board));
+      board.state[0][3] = p;
+      pieces.add(p = new RookPiece(color, 0, 0, board));
+      board.state[0][0] = p;
+      pieces.add(p = new RookPiece(color, 0, 7, board));
+      board.state[0][7] = p;
+      pieces.add(p = new KnightPiece(color, 0, 1, board));
+      board.state[0][1] = p;
+      pieces.add(p = new KnightPiece(color, 0, 6, board));
+      board.state[0][6] = p;
+      pieces.add(p = new BishopPiece(color, 0, 2, board));
+      board.state[0][2] = p;
+      pieces.add(p = new BishopPiece(color, 0, 5, board));
+      board.state[0][5] = p;
+      color = true; // set black pieces
+      for (int i = 0; i < Board.MAX_COL; i++) { // set black pawns
+        p = new PawnPiece(color, 6, i, board);
+        pieces.add(p);
+        board.state[6][i] = p;
       }
-      pieces.add(new KingPiece(color, 7, 4));
-      pieces.add(new QueenPiece(color, 7, 3));
-      pieces.add(new RookPiece(color, 7, 0));
-      pieces.add(new RookPiece(color, 7, 7));
-      pieces.add(new KnightPiece(color, 7, 1));
-      pieces.add(new KnightPiece(color, 7, 6));
-      pieces.add(new BishopPiece(color, 7, 2));
-      pieces.add(new BishopPiece(color, 7, 5));
+      pieces.add(p = new KingPiece(color, 7, 4, board));
+      board.state[7][4] = p;
+      pieces.add(p = new QueenPiece(color, 7, 3, board));
+      board.state[7][3] = p;
+      pieces.add(p = new RookPiece(color, 7, 0, board));
+      board.state[7][0] = p;
+      pieces.add(p = new RookPiece(color, 7, 7, board));
+      board.state[7][7] = p;
+      pieces.add(p = new KnightPiece(color, 7, 1, board));
+      board.state[7][1] = p;
+      pieces.add(p = new KnightPiece(color, 7, 6, board));
+      board.state[7][6] = p;
+      pieces.add(p = new BishopPiece(color, 7, 2, board));
+      board.state[7][2] = p;
+      pieces.add(p = new BishopPiece(color, 7, 5, board));
+      board.state[7][5] = p;
     }
 
-  }
-
-  public synchronized void stop() {
-    if (!running)
-      return;
-
-    running = false;
-    try {
-      gameThread.join();
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
-  }
-
-  public boolean pieceAtPosition(int y, int x) {
-    synchronized (pieces) {
-      for (ChessPiece piece : pieces) {
-        if (piece.isPosition(piece.getRow(y), piece.getCol(x)))
-          return true;
-      }
-      return false;
-    }
-  }
-
-  public boolean friendlyPieceAtPosition(int y, int x) {
-    synchronized (pieces) {
-      for (ChessPiece piece : pieces) {
-        if (piece.isPosition(piece.getRow(y), piece.getCol(x)) && piece.color == turn) {
-          activePiece.originalPosition();
-          return true;
-        }
-      }
-      return false;
-    }
-  }
-
-  public ChessPiece enemyPieceAtPosition(int y, int x) {
-    synchronized (pieces) {
-      for (ChessPiece piece : pieces) {
-        if (piece.isPosition(piece.getRow(y), piece.getCol(x)) && piece.color != turn) {
-          return piece;
-        }
-      }
-      return null;
-    }
   }
 
   public void update() {
-    repaint();
     synchronized (pieces) {
       if (mouse.pressed && !check) {
-        for (ChessPiece piece : pieces) {
-          if (piece.isPosition(piece.getRow(mouse.pressedY), piece.getCol(mouse.pressedX)) && piece.color == turn) {
-            activePiece = piece;
-            mouse.x = mouse.pressedX;
-            mouse.y = mouse.pressedY;
-            check = true;
-          }
+        ChessPiece piece = board.pieceAtPosition(mouse.pressedY, mouse.pressedX);
+        if (piece != null && piece.color == turn) {
+          activePiece = piece;
+          board.setActiveBlock(mouse.pressedY, mouse.pressedX);
+          mouse.x = mouse.pressedX;
+          mouse.y = mouse.pressedY;
+          check = true;
         }
       }
       if (!mouse.pressed && check) {
-        if (!friendlyPieceAtPosition(mouse.y, mouse.x))
-          if (activePiece.canMove(activePiece.getRow(mouse.y), activePiece.getCol(mouse.x), pieces)) {
-            activePiece.update(activePiece.getRow(mouse.y), activePiece.getCol(mouse.x));
-            pieces.remove(enemyPieceAtPosition(mouse.y, mouse.x));
-            turn = !turn;
-            activePiece.lastMoveNumber = MainPanel.moveNumber;
-            MainPanel.moveNumber++;
-          } else {
-            activePiece.originalPosition();
-          }
+        if (board.friendlyPieceAtPosition(mouse.y, mouse.x, turn) == null
+            && activePiece.canMove(activePiece.getRow(mouse.y), activePiece.getCol(mouse.x), pieces)) {
+          activePiece.update(activePiece.getRow(mouse.y), activePiece.getCol(mouse.x));
+          pieces.remove(board.enemyPieceAtPosition(mouse.y, mouse.x, turn));
+          board.updateActiveBlock(mouse.y, mouse.x);
+          turn = !turn;
+          activePiece.lastMoveNumber = Game.moveNumber;
+          Game.moveNumber++;
+        } else {
+          activePiece.originalPosition();
+        }
         check = false;
         activePiece = null;
       }
@@ -176,6 +167,22 @@ class MainPanel extends JPanel implements Runnable {
       if (activePiece != null) {
         activePiece.drag(mouse.y, mouse.x);
       }
+    }
+  }
+
+  public void render(Graphics2D g2d) {
+    board.draw(g2d);
+    drawPieces(g2d);
+    // System.out.println("teri nigghon mai") ;
+  }
+
+  public void drawPieces(Graphics2D g2d) {
+    synchronized (pieces) {
+      for (ChessPiece piece : pieces) {
+        piece.draw(g2d);
+      }
+      if (activePiece != null)
+        activePiece.draw(g2d);
     }
   }
 
@@ -189,6 +196,7 @@ class MainPanel extends JPanel implements Runnable {
       // update
       update();
       // render
+      boardPanel.repaint();
       renderTime = System.currentTimeMillis() - startTime;
 
       if (renderTime < FRAME_TIME) {
@@ -202,14 +210,6 @@ class MainPanel extends JPanel implements Runnable {
     }
   }
 
-  public void paintComponent(Graphics g) {
-    super.paintComponent(g);
-    Graphics2D g2d = (Graphics2D) g;
-    board.draw(g2d);
-    synchronized (pieces) {
-      drawPieces(g2d);
-    }
-  }
 }
 
 class Board {
@@ -219,6 +219,71 @@ class Board {
   public static final int MAX_ROW = 8;
   private final Color DARK = new Color(118, 150, 86);
   private final Color LIGHT = new Color(238, 238, 210);
+  public ChessPiece state[][] = new ChessPiece[8][8];
+  public ArrayList<ChessPiece> pieces;
+  public int activeBlockCol;
+  public int activeBlockRow;
+
+  public Board(ArrayList<ChessPiece> pieces) {
+    this.pieces = pieces;
+  }
+
+  public void setActiveBlock(int y, int x) {
+    if (getRow(y) < 0 || getRow(y) > 7 || getCol(x) < 0 || getCol(x) > 7)
+      return;
+    activeBlockCol = getCol(x);
+    activeBlockRow = getRow(y);
+  }
+
+  public void updateActiveBlock(int y, int x) {
+    if (getRow(y) < 0 || getRow(y) > 7 || getCol(x) < 0 || getCol(x) > 7)
+      return;
+    // pieces.remove(state[activeBlockRow][activeBlockCol]);
+    state[getRow(y)][getCol(x)] = state[activeBlockRow][activeBlockCol];
+    state[activeBlockRow][activeBlockCol] = null;
+  }
+
+  public ChessPiece pieceAtPosition(int y, int x) {
+    if (getRow(y) < 0 || getRow(y) > 7 || getCol(x) < 0 || getCol(x) > 7)
+      return null;
+    return state[getRow(y)][getCol(x)];
+  }
+
+  public ChessPiece friendlyPieceAtPosition(int y, int x, boolean friendlyPieceColor) {
+    if (getRow(y) < 0 || getRow(y) > 7 || getCol(x) < 0 || getCol(x) > 7)
+      return null;
+    ChessPiece piece = state[getRow(y)][getCol(x)];
+    if (piece == null)
+      return null;
+    if (piece.color != friendlyPieceColor)
+      return null;
+    return state[getRow(y)][getCol(x)];
+  }
+
+  public ChessPiece enemyPieceAtPosition(int y, int x, boolean friendlyPieceColor) {
+    if (getRow(y) < 0 || getRow(y) > 7 || getCol(x) < 0 || getCol(x) > 7)
+      return null;
+    ChessPiece piece = state[getRow(y)][getCol(x)];
+    if (piece == null)
+      return null;
+    if (piece.color == friendlyPieceColor) {
+      return null;
+    }
+    return state[getRow(y)][getCol(x)];
+  }
+
+  public int getCol(int x) {
+    return x / Board.SQUARE_SIZE;
+  }
+
+  public int getRow(int y) {
+    return y / Board.SQUARE_SIZE;
+  }
+
+  public void remove(int row, int col) {
+    pieces.remove(state[row][col]);
+    state[row][col] = null;
+  }
 
   public void draw(Graphics2D g2d) {
 
@@ -244,8 +309,10 @@ abstract class ChessPiece {
   public String path;
   public String pathColor;
   public int lastMoveNumber = 0;
+  public Board board;
 
-  public ChessPiece(boolean color, int row, int col) {
+  public ChessPiece(boolean color, int row, int col, Board board) {
+    this.board = board;
     this.col = col;
     this.row = row;
     this.color = color;
@@ -316,21 +383,27 @@ abstract class ChessPiece {
 
 class KingPiece extends ChessPiece {
 
-  public KingPiece(boolean color, int row, int col) {
-    super(color, row, col);
+  public KingPiece(boolean color, int row, int col, Board board) {
+    super(color, row, col, board);
     this.path = "./../assets/pieces/" + pathColor + "/king" + ".png";
     this.image = new ImageIcon(path).getImage();
   }
 
-  public boolean inCheck() {
+  public boolean inCheck(ArrayList<ChessPiece> pieces) {
+    for (ChessPiece piece : pieces) {
+      if (piece.color == this.color)
+        continue;
+      if (piece.canMove(this.row, this.col, pieces))
+        return true;
+    }
     return false;
   }
 
-  public boolean canCastle(int row, int col, ArrayList<ChessPiece> pieces){
+  public boolean canCastle(int row, int col, ArrayList<ChessPiece> pieces) {
     int coldiff = this.col - col;
     if (this.lastMoveNumber == 0 && this.row == (color ? 7 : 0) && Math.abs(coldiff) == 2) {
       if (coldiff > 0) {
-        for (ChessPiece piece : pieces){
+        for (ChessPiece piece : pieces) {
           if (piece.isPosition(this.row, 1) || piece.isPosition(this.row, 2) || piece.isPosition(this.row, 3))
             return false;
         }
@@ -343,7 +416,7 @@ class KingPiece extends ChessPiece {
           }
         }
       } else {
-        for(ChessPiece piece : pieces){
+        for (ChessPiece piece : pieces) {
           if (piece.isPosition(this.row, 5) || piece.isPosition(this.row, 6))
             return false;
         }
@@ -357,7 +430,7 @@ class KingPiece extends ChessPiece {
         }
       }
     }
-    return false ;
+    return false;
   }
 
   public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces) {
@@ -365,7 +438,8 @@ class KingPiece extends ChessPiece {
 
     int rowdiff = this.row - row;
     int coldiff = this.col - col;
-    if(canCastle(row, col, pieces)) return true ;
+    if (canCastle(row, col, pieces))
+      return true;
     if (!((Math.abs(rowdiff) | Math.abs(coldiff)) == 1))
       return false;
     return true;
@@ -374,8 +448,8 @@ class KingPiece extends ChessPiece {
 
 class QueenPiece extends ChessPiece {
 
-  public QueenPiece(boolean color, int row, int col) {
-    super(color, row, col);
+  public QueenPiece(boolean color, int row, int col, Board board) {
+    super(color, row, col, board);
     this.path = "./../assets/pieces/" + pathColor + "/queen" + ".png";
     this.image = new ImageIcon(path).getImage();
   }
@@ -383,58 +457,89 @@ class QueenPiece extends ChessPiece {
   public boolean isBlocked(int row, int col, ArrayList<ChessPiece> pieces) {
     int rowdiff = this.row - row;
     int coldiff = this.col - col;
-    for (ChessPiece piece : pieces) {
-      if (piece == this)
-        continue;
-      int rdiff = this.row - piece.row;
-      int cdiff = this.col - piece.col;
-      if (coldiff == 0) {
-        if (piece.col == col) {
-          if (rowdiff > 0 && piece.row < this.row) {
-            if (row < piece.row)
-              return true;
-          } else if (rowdiff < 0 && piece.row > this.row) {
-            if (row > piece.row)
-              return true;
-          }
+    int checkrow;
+    int checkcol;
+
+    if (rowdiff > 0 && coldiff < 0) { 
+      checkcol = this.col + 1;
+      checkrow = this.row - 1;
+      for (; checkrow > row; checkrow--, checkcol++) {
+        if (board.state[checkrow][checkcol] != null) {
+          return true;
         }
-      } else if (rowdiff == 0) {
-        if (piece.row == row) {
-          if (coldiff > 0 && piece.col < this.col) {
-            if (col < piece.col)
-              return true;
-          } else if (coldiff < 0 && piece.col > this.col) {
-            if (col > piece.col)
-              return true;
-          }
-        }
-      }
-      if (!(Math.abs(rdiff) == Math.abs(cdiff)))
-        continue;
-      if ((rowdiff > 0 && coldiff < 0) && (rdiff > 0 && cdiff < 0)) { // works
-        // the firstQuadrant
-        if (piece.row - row > 0 && piece.col - col < 0)
-          return true;
-      }
-
-      if ((rowdiff > 0 && coldiff > 0) && (rdiff > 0 && cdiff > 0)) { // works
-        // the secondquadrant
-        if (piece.row - row > 0 && piece.col - col > 0)
-          return true;
-      }
-
-      if ((rowdiff < 0 && coldiff > 0) && (rdiff < 0 && cdiff > 0)) { // works
-        // the thirdQuadrant
-        if (piece.row - row < 0 && piece.col - col > 0)
-          return true;
-      }
-
-      if ((rowdiff < 0 && coldiff < 0) && (rdiff < 0 && cdiff < 0)) { // works
-        // the fourthquadrant
-        if (piece.row - row < 0 && piece.col - col < 0)
-          return true;
       }
     }
+
+    else if (rowdiff > 0 && coldiff > 0) { 
+      checkcol = this.col - 1;
+      checkrow = this.row - 1;
+      for (; checkrow > row; checkrow--, checkcol--) {
+        if (board.state[checkrow][checkcol] != null) {
+          return true;
+        }
+      }
+    }
+
+    else if (rowdiff < 0 && coldiff < 0) { 
+      checkcol = this.col + 1;
+      checkrow = this.row + 1;
+      for (; checkrow < row; checkrow++, checkcol++) {
+        if (board.state[checkrow][checkcol] != null) {
+          return true;
+        }
+      }
+    }
+
+    else if (rowdiff < 0 && coldiff > 0) {
+      checkcol = this.col - 1;
+      checkrow = this.row + 1;
+      for (; checkrow < row; checkrow++, checkcol--) {
+        if (board.state[checkrow][checkcol] != null) {
+          return true;
+        }
+      }
+    }
+
+    else if (coldiff == 0 && rowdiff > 0) {
+      checkrow = this.row - 1;
+      checkcol = this.col;
+      for (; checkrow > row; checkrow--) {
+        if (board.state[checkrow][checkcol] != null) {
+          return true;
+        }
+      }
+    }
+
+    else if (coldiff == 0 && rowdiff < 0) {
+      checkrow = this.row + 1;
+      checkcol = this.col;
+      for (; checkrow < row; checkrow++) {
+        if (board.state[checkrow][checkcol] != null) {
+          return true;
+        }
+      }
+    }
+
+    else if (rowdiff == 0 && coldiff > 0) {
+      checkrow = this.row;
+      checkcol = this.col - 1;
+      for (; checkcol > col; checkcol--) {
+        if (board.state[checkrow][checkcol] != null) {
+          return true;
+        }
+      }
+    }
+
+    else if (rowdiff == 0 && coldiff < 0) {
+      checkrow = this.row;
+      checkcol = this.col + 1;
+      for (; checkcol < col; checkcol++) {
+        if (board.state[checkrow][checkcol] != null) {
+          return true;
+        }
+      }
+    }
+
     return false;
   }
 
@@ -454,37 +559,54 @@ class QueenPiece extends ChessPiece {
 
 class RookPiece extends ChessPiece {
 
-  public RookPiece(boolean color, int row, int col) {
-    super(color, row, col);
+  public RookPiece(boolean color, int row, int col, Board board) {
+    super(color, row, col, board);
     this.path = "./../assets/pieces/" + pathColor + "/rook" + ".png";
     this.image = new ImageIcon(path).getImage();
   }
 
-  public boolean isBlocked(int row, int col, ArrayList<ChessPiece> pieces) {
+  public boolean isBlocked(int row, int col) {
     int rowdiff = this.row - row;
     int coldiff = this.col - col;
-    for (ChessPiece piece : pieces) {
-      if (piece == this)
-        continue;
-      if (coldiff == 0) {
-        if (piece.col == col) {
-          if (rowdiff > 0 && piece.row < this.row) {
-            if (row < piece.row)
-              return true;
-          } else if (rowdiff < 0 && piece.row > this.row) {
-            if (row > piece.row)
-              return true;
-          }
+    int checkrow;
+    int checkcol;
+
+    if (coldiff == 0 && rowdiff > 0) {
+      checkrow = this.row - 1;
+      checkcol = this.col;
+      for (; checkrow > row; checkrow--) {
+        if (board.state[checkrow][checkcol] != null) {
+          return true;
         }
-      } else if (rowdiff == 0) {
-        if (piece.row == row) {
-          if (coldiff > 0 && piece.col < this.col) {
-            if (col < piece.col)
-              return true;
-          } else if (coldiff < 0 && piece.col > this.col) {
-            if (col > piece.col)
-              return true;
-          }
+      }
+    }
+
+    else if (coldiff == 0 && rowdiff < 0) {
+      checkrow = this.row + 1;
+      checkcol = this.col;
+      for (; checkrow < row; checkrow++) {
+        if (board.state[checkrow][checkcol] != null) {
+          return true;
+        }
+      }
+    }
+
+    else if (rowdiff == 0 && coldiff > 0) {
+      checkrow = this.row;
+      checkcol = this.col - 1;
+      for (; checkcol > col; checkcol--) {
+        if (board.state[checkrow][checkcol] != null) {
+          return true;
+        }
+      }
+    }
+
+    else if (rowdiff == 0 && coldiff < 0) {
+      checkrow = this.row;
+      checkcol = this.col + 1;
+      for (; checkcol < col; checkcol++) {
+        if (board.state[checkrow][checkcol] != null) {
+          return true;
         }
       }
     }
@@ -495,10 +617,9 @@ class RookPiece extends ChessPiece {
     super.canMove(row, col, pieces);
     int rowdiff = Math.abs(this.row - row);
     int coldiff = Math.abs(this.col - col);
-    // System.out.println("this is weird" + isBlocked(row, col, pieces));
     if (!(rowdiff > 0 != coldiff > 0))
       return false;
-    if (isBlocked(row, col, pieces))
+    if (isBlocked(row, col))
       return false;
     return true;
   }
@@ -506,46 +627,58 @@ class RookPiece extends ChessPiece {
 
 class BishopPiece extends ChessPiece {
 
-  public BishopPiece(boolean color, int row, int col) {
-    super(color, row, col);
+  public BishopPiece(boolean color, int row, int col, Board board) {
+    super(color, row, col, board);
     this.path = "./../assets/pieces/" + pathColor + "/bishop" + ".png";
     this.image = new ImageIcon(path).getImage();
   }
 
-  public boolean isBlocked(int row, int col, ArrayList<ChessPiece> pieces) {
+  public boolean isBlocked(int row, int col) {
     int rowdiff = this.row - row;
     int coldiff = this.col - col;
-    for (ChessPiece piece : pieces) {
-      if (this == piece)
-        continue;
-      int rdiff = this.row - piece.row;
-      int cdiff = this.col - piece.col;
-      if (!(Math.abs(rdiff) == Math.abs(cdiff)))
-        continue;
-      if ((rowdiff > 0 && coldiff < 0) && (rdiff > 0 && cdiff < 0)) { // works
-        // the firstQuadrant
-        if (piece.row - row > 0 && piece.col - col < 0)
-          return true;
-      }
+    int checkrow;
+    int checkcol;
 
-      if ((rowdiff > 0 && coldiff > 0) && (rdiff > 0 && cdiff > 0)) { // works
-        // the secondquadrant
-        if (piece.row - row > 0 && piece.col - col > 0)
+    if (rowdiff > 0 && coldiff < 0) { //WORKS:
+      checkcol = this.col + 1;
+      checkrow = this.row - 1;
+      for (; checkrow > row; checkrow--, checkcol++) {
+        if (board.state[checkrow][checkcol] != null) {
           return true;
-      }
-
-      if ((rowdiff < 0 && coldiff > 0) && (rdiff < 0 && cdiff > 0)) { // works
-        // the thirdQuadrant
-        if (piece.row - row < 0 && piece.col - col > 0)
-          return true;
-      }
-
-      if ((rowdiff < 0 && coldiff < 0) && (rdiff < 0 && cdiff < 0)) { // works
-        // the fourthquadrant
-        if (piece.row - row < 0 && piece.col - col < 0)
-          return true;
+        }
       }
     }
+
+    else if (rowdiff > 0 && coldiff > 0) { //WORKS:
+      checkcol = this.col - 1;
+      checkrow = this.row - 1;
+      for (; checkrow > row; checkrow--, checkcol--) {
+        if (board.state[checkrow][checkcol] != null) {
+          return true;
+        }
+      }
+    }
+
+    else if (rowdiff < 0 && coldiff < 0) { //WORKS:
+      checkcol = this.col + 1;
+      checkrow = this.row + 1;
+      for (; checkrow < row; checkrow++, checkcol++) {
+        if (board.state[checkrow][checkcol] != null) {
+          return true;
+        }
+      }
+    }
+
+    else if (rowdiff < 0 && coldiff > 0) {
+      checkcol = this.col - 1;
+      checkrow = this.row + 1;
+      for (; checkrow < row; checkrow++, checkcol--) {
+        if (board.state[checkrow][checkcol] != null) {
+          return true;
+        }
+      }
+    }
+
     return false;
   }
 
@@ -557,7 +690,7 @@ class BishopPiece extends ChessPiece {
       return false;
     if (!(rowdiff == coldiff))
       return false;
-    if (isBlocked(row, col, pieces))
+    if (isBlocked(row, col)) // DO: change implementation
       return false;
     return true;
   }
@@ -565,8 +698,8 @@ class BishopPiece extends ChessPiece {
 
 class KnightPiece extends ChessPiece {
 
-  public KnightPiece(boolean color, int row, int col) {
-    super(color, row, col);
+  public KnightPiece(boolean color, int row, int col, Board board) {
+    super(color, row, col, board);
     this.path = "./../assets/pieces/" + pathColor + "/knight" + ".png";
     this.image = new ImageIcon(path).getImage();
   }
@@ -586,27 +719,20 @@ class PawnPiece extends ChessPiece {
   public boolean enPassant = false;
   public int direction;
 
-  public PawnPiece(boolean color, int row, int col) {
-    super(color, row, col);
+  public PawnPiece(boolean color, int row, int col, Board board) {
+    super(color, row, col, board);
     this.path = "./../assets/pieces/" + pathColor + "/pawn" + ".png";
     this.image = new ImageIcon(path).getImage();
   }
 
-  public boolean isBlocked(int row, int col, ArrayList<ChessPiece> pieces) {
+  public boolean isBlocked(int row, int col) {
     int coldiff = this.col - col;
-
     if (coldiff == 0) {
-      for (ChessPiece piece : pieces) {
-        if (this == piece)
-          continue;
-        if (piece.isPosition(row, col))
-          return true;
-      }
+      if (board.state[row][col] != null)
+        return true;
     } else {
-      for (ChessPiece piece : pieces) {
-        if (this == piece || piece.color == this.color)
-          continue;
-        if (piece.isPosition(row, col))
+      if (board.state[row][col] != null) {
+        if (board.state[row][col].color != this.color)
           return true;
       }
     }
@@ -618,22 +744,19 @@ class PawnPiece extends ChessPiece {
     int rowdiff = this.row - row;
     int coldiff = this.col - col;
     direction = color ? 1 : -1;
+    ChessPiece piece;
 
-    if (this.row == (this.color ? 3 : 4) && Math.abs(coldiff) == 1) {
-      for (ChessPiece piece : pieces) {
-        if (piece.color == this.color || !piece.path.contains("/pawn.png"))
-          continue;
-        PawnPiece pawnPiece = (PawnPiece) piece;
-        if (pawnPiece.isPosition(this.row, col) && pawnPiece.enPassant == true
-            && MainPanel.moveNumber - pawnPiece.lastMoveNumber == 1) {
-          pieces.remove(piece);
-          return true;
-        }
+    if ((piece = board.state[row + direction][col]) != null && Math.abs(coldiff) == 1 && piece.path.contains("/pawn")) {
+      PawnPiece pawnPiece = (PawnPiece) piece;
+      if (pawnPiece.color != this.color && Game.moveNumber - pawnPiece.lastMoveNumber == 1
+          && pawnPiece.enPassant == true) {
+        board.remove(row + direction, col);
+        return true;
       }
     }
 
     if (rowdiff == direction && coldiff == 0) {
-      if (isBlocked(this.row - direction, col, pieces))
+      if (isBlocked(this.row - direction, col))
         return false;
       if (firstMove == true)
         firstMove = false;
@@ -644,7 +767,7 @@ class PawnPiece extends ChessPiece {
 
     if (rowdiff == 2 * direction && firstMove == true && coldiff == 0) {
       // DO: check blocked or not
-      if (isBlocked(this.row - direction, col, pieces) || isBlocked(this.row - 2 * direction, col, pieces))
+      if (isBlocked(this.row - direction, col) || isBlocked(this.row - 2 * direction, col))
         return false;
       if (!enPassant && firstMove)
         enPassant = true;
@@ -654,7 +777,7 @@ class PawnPiece extends ChessPiece {
 
     if (rowdiff == direction && Math.abs(coldiff) == 1) {
       // DO: if opponent piece available return true else return false
-      if (isBlocked(this.row - direction, col, pieces))
+      if (isBlocked(this.row - direction, col))
         return true;
       if (firstMove == true)
         firstMove = false;
