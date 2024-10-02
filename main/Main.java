@@ -9,17 +9,24 @@ import java.util.ArrayList;
 public class Main {
 
   public static void main(String[] args) {
+    JFrame chat = new JFrame("chat");
     JFrame chess = new JFrame("Chess");
     MainPanel boardPanel = new MainPanel();
     boardPanel.setBorder(BorderFactory.createMatteBorder(5, 5, 5, 5, new Color(0, 0, 0)));
     chess.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    chat.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     chess.setResizable(false);
+    chat.setResizable(false);
     chess.getContentPane().add(boardPanel);
     chess.pack();
     chess.setLocationRelativeTo(null);
     chess.setVisible(true);
     boardPanel.launchClient();
   }
+
+}
+
+class ChatPanel extends JPanel {
 
 }
 
@@ -173,7 +180,6 @@ class Game implements Runnable {
   public void render(Graphics2D g2d) {
     board.draw(g2d);
     drawPieces(g2d);
-    // System.out.println("teri nigghon mai") ;
   }
 
   public void drawPieces(Graphics2D g2d) {
@@ -340,7 +346,8 @@ abstract class ChessPiece {
   }
 
   public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces) {
-    return true;
+    if(board.friendlyPieceAtPosition(mouse.y, mouse.x, turn) == null)
+    return false;
   }
 
   public void originalPosition() {
@@ -399,34 +406,27 @@ class KingPiece extends ChessPiece {
     return false;
   }
 
-  public boolean canCastle(int row, int col, ArrayList<ChessPiece> pieces) {
+  public boolean canCastle(int row, int col) {
     int coldiff = this.col - col;
+
     if (this.lastMoveNumber == 0 && this.row == (color ? 7 : 0) && Math.abs(coldiff) == 2) {
       if (coldiff > 0) {
-        for (ChessPiece piece : pieces) {
-          if (piece.isPosition(this.row, 1) || piece.isPosition(this.row, 2) || piece.isPosition(this.row, 3))
-            return false;
+        if (board.state[this.row][1] != null || board.state[this.row][2] != null || board.state[this.row][3] != null) {
+          return false;
         }
-        for (ChessPiece piece : pieces) {
-          if (!piece.color == this.color || !piece.path.contains("/rook.png"))
-            continue;
-          if (piece.lastMoveNumber == 0 && piece.col == 0) {
-            piece.update(this.row, 3);
-            return true;
-          }
+        if (board.state[this.row][0] != null && board.state[this.row][0].path.contains("/rook")
+            && board.state[this.row][0].lastMoveNumber == 0) {
+          board.state[this.row][0].update(this.row, 3);
+          return true;
         }
       } else {
-        for (ChessPiece piece : pieces) {
-          if (piece.isPosition(this.row, 5) || piece.isPosition(this.row, 6))
-            return false;
+        if (board.state[this.row][5] != null || board.state[this.row][6] != null) {
+          return false;
         }
-        for (ChessPiece piece : pieces) {
-          if (!piece.color == this.color || !piece.path.contains("/rook.png"))
-            continue;
-          if (piece.lastMoveNumber == 0 && piece.col == 7) {
-            piece.update(this.row, 5);
-            return true;
-          }
+        if (board.state[this.row][7] != null && board.state[this.row][7].path.contains("/rook")
+            && board.state[this.row][7].lastMoveNumber == 0) {
+          board.state[this.row][7].update(this.row, 5);
+          return true;
         }
       }
     }
@@ -438,7 +438,7 @@ class KingPiece extends ChessPiece {
 
     int rowdiff = this.row - row;
     int coldiff = this.col - col;
-    if (canCastle(row, col, pieces))
+    if (canCastle(row, col))
       return true;
     if (!((Math.abs(rowdiff) | Math.abs(coldiff)) == 1))
       return false;
@@ -454,13 +454,13 @@ class QueenPiece extends ChessPiece {
     this.image = new ImageIcon(path).getImage();
   }
 
-  public boolean isBlocked(int row, int col, ArrayList<ChessPiece> pieces) {
+  public boolean isBlocked(int row, int col) {
     int rowdiff = this.row - row;
     int coldiff = this.col - col;
     int checkrow;
     int checkcol;
 
-    if (rowdiff > 0 && coldiff < 0) { 
+    if (rowdiff > 0 && coldiff < 0) {
       checkcol = this.col + 1;
       checkrow = this.row - 1;
       for (; checkrow > row; checkrow--, checkcol++) {
@@ -470,7 +470,7 @@ class QueenPiece extends ChessPiece {
       }
     }
 
-    else if (rowdiff > 0 && coldiff > 0) { 
+    else if (rowdiff > 0 && coldiff > 0) {
       checkcol = this.col - 1;
       checkrow = this.row - 1;
       for (; checkrow > row; checkrow--, checkcol--) {
@@ -480,7 +480,7 @@ class QueenPiece extends ChessPiece {
       }
     }
 
-    else if (rowdiff < 0 && coldiff < 0) { 
+    else if (rowdiff < 0 && coldiff < 0) {
       checkcol = this.col + 1;
       checkrow = this.row + 1;
       for (; checkrow < row; checkrow++, checkcol++) {
@@ -551,7 +551,7 @@ class QueenPiece extends ChessPiece {
       return false;
     if (!((rowdiff > 0 != coldiff > 0) || (rowdiff == coldiff)))
       return false;
-    if (isBlocked(row, col, pieces))
+    if (isBlocked(row, col))
       return false;
     return true;
   }
@@ -639,7 +639,7 @@ class BishopPiece extends ChessPiece {
     int checkrow;
     int checkcol;
 
-    if (rowdiff > 0 && coldiff < 0) { //WORKS:
+    if (rowdiff > 0 && coldiff < 0) { // WORKS:
       checkcol = this.col + 1;
       checkrow = this.row - 1;
       for (; checkrow > row; checkrow--, checkcol++) {
@@ -649,7 +649,7 @@ class BishopPiece extends ChessPiece {
       }
     }
 
-    else if (rowdiff > 0 && coldiff > 0) { //WORKS:
+    else if (rowdiff > 0 && coldiff > 0) { // WORKS:
       checkcol = this.col - 1;
       checkrow = this.row - 1;
       for (; checkrow > row; checkrow--, checkcol--) {
@@ -659,7 +659,7 @@ class BishopPiece extends ChessPiece {
       }
     }
 
-    else if (rowdiff < 0 && coldiff < 0) { //WORKS:
+    else if (rowdiff < 0 && coldiff < 0) { // WORKS:
       checkcol = this.col + 1;
       checkrow = this.row + 1;
       for (; checkrow < row; checkrow++, checkcol++) {
