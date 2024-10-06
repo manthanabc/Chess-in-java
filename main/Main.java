@@ -346,7 +346,7 @@ abstract class ChessPiece {
   }
 
   public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces) {
-    if(board.friendlyPieceAtPosition(mouse.y, mouse.x, turn) == null)
+    // if(board.friendlyPieceAtPosition(mouse.y, mouse.x, turn) == null)
     return false;
   }
 
