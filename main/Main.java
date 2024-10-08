@@ -157,7 +157,7 @@ class Game implements Runnable {
       }
       if (!mouse.pressed && check) {
         if (board.friendlyPieceAtPosition(mouse.y, mouse.x, turn) == null
-            && activePiece.canMove(activePiece.getRow(mouse.y), activePiece.getCol(mouse.x), pieces)) {
+            && activePiece.canMove(activePiece.getRow(mouse.y), activePiece.getCol(mouse.x), pieces, true)) {
           activePiece.update(activePiece.getRow(mouse.y), activePiece.getCol(mouse.x));
           pieces.remove(board.enemyPieceAtPosition(mouse.y, mouse.x, turn));
           board.updateActiveBlock(mouse.y, mouse.x);
@@ -227,6 +227,8 @@ class Board {
   private final Color LIGHT = new Color(238, 238, 210);
   public ChessPiece state[][] = new ChessPiece[8][8];
   public ArrayList<ChessPiece> pieces;
+  public boolean blackCheck = false;
+  public boolean whiteCheck = true;
   public int activeBlockCol;
   public int activeBlockRow;
 
@@ -345,9 +347,26 @@ abstract class ChessPiece {
     this.y = y - Board.SQUARE_SIZE / 2;
   }
 
-  public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces) {
-    // if(board.friendlyPieceAtPosition(mouse.y, mouse.x, turn) == null)
-    return false;
+  public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces, boolean r) {
+
+    KingPiece k = null;
+    for(ChessPiece p : pieces ) {
+      if(p.path.contains("king") && p.color == this.color) {
+        k = (KingPiece) p;
+      }
+    }
+
+    if(k != null && r) {
+      int cur_row = this.row;
+      int cur_col = this.col;
+      this.update(row, col);
+      if(k.inCheck(pieces)) {
+        this.update(cur_row, cur_col);
+        return false;
+      }
+      this.update(cur_row, cur_col);
+    }
+    return true;
   }
 
   public void originalPosition() {
@@ -400,7 +419,7 @@ class KingPiece extends ChessPiece {
     for (ChessPiece piece : pieces) {
       if (piece.color == this.color)
         continue;
-      if (piece.canMove(this.row, this.col, pieces))
+      if (piece.canMove(this.row, this.col, pieces, false))
         return true;
     }
     return false;
@@ -433,8 +452,8 @@ class KingPiece extends ChessPiece {
     return false;
   }
 
-  public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces) {
-    super.canMove(row, col, pieces);
+  public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces, boolean r) {
+    if(!super.canMove(row, col, pieces, r)) return false;
 
     int rowdiff = this.row - row;
     int coldiff = this.col - col;
@@ -543,8 +562,8 @@ class QueenPiece extends ChessPiece {
     return false;
   }
 
-  public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces) {
-    super.canMove(row, col, pieces);
+  public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces, boolean r) {
+    if(!super.canMove(row, col, pieces, r)) return false;
     int rowdiff = Math.abs(this.row - row);
     int coldiff = Math.abs(this.col - col);
     if (rowdiff == 0 && coldiff == 0)
@@ -613,8 +632,8 @@ class RookPiece extends ChessPiece {
     return false;
   }
 
-  public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces) {
-    super.canMove(row, col, pieces);
+  public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces, boolean r) {
+    if(!super.canMove(row, col, pieces, r)) return false;
     int rowdiff = Math.abs(this.row - row);
     int coldiff = Math.abs(this.col - col);
     if (!(rowdiff > 0 != coldiff > 0))
@@ -682,8 +701,8 @@ class BishopPiece extends ChessPiece {
     return false;
   }
 
-  public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces) {
-    super.canMove(row, col, pieces);
+  public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces, boolean r) {
+    if(!super.canMove(row, col, pieces, r)) return false;
     int rowdiff = Math.abs(this.row - row);
     int coldiff = Math.abs(this.col - col);
     if (rowdiff == 0 && coldiff == 0)
@@ -704,8 +723,8 @@ class KnightPiece extends ChessPiece {
     this.image = new ImageIcon(path).getImage();
   }
 
-  public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces) {
-    super.canMove(row, col, pieces);
+  public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces, boolean r) {
+    if(!super.canMove(row, col, pieces, r)) return false;
     int rowdiff = Math.abs(this.row - row);
     int coldiff = Math.abs(this.col - col);
     if (rowdiff == 0 || coldiff == 0)
@@ -739,8 +758,8 @@ class PawnPiece extends ChessPiece {
     return false;
   }
 
-  public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces) {
-    super.canMove(row, col, pieces);
+  public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces, boolean r) {
+    if(!super.canMove(row, col, pieces, r)) return false;
     int rowdiff = this.row - row;
     int coldiff = this.col - col;
     direction = color ? 1 : -1;
