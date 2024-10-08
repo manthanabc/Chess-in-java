@@ -360,10 +360,17 @@ abstract class ChessPiece {
       int cur_row = this.row;
       int cur_col = this.col;
       this.update(row, col);
+      this.board.state[cur_row][cur_col]= null;
+      ChessPiece g = this.board.state[row][col];
+      this.board.state[row][col] = this;
       if(k.inCheck(pieces)) {
         this.update(cur_row, cur_col);
+        this.board.state[cur_row][cur_col]= this;
+        this.board.state[row][col] = g;
         return false;
       }
+      this.board.state[cur_row][cur_col]= this;
+      this.board.state[row][col] = g;
       this.update(cur_row, cur_col);
     }
     return true;
