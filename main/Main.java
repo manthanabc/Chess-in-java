@@ -396,10 +396,10 @@ abstract class ChessPiece {
         this.update(cur_row, cur_col);
         this.board.state[cur_row][cur_col]= this;
         this.board.state[row][col] = g;
-        if(g != null){
-        pieces.add(g);
-        }
         return false;
+      }
+      if(g != null){
+        pieces.add(g);
       }
       this.board.state[cur_row][cur_col]= this;
       this.board.state[row][col] = g;
@@ -835,12 +835,12 @@ class PawnPiece extends ChessPiece {
 
     if (rowdiff == direction && Math.abs(coldiff) == 1) {
       // DO: if opponent piece available return true else return false
-      if (isBlocked(this.row - direction, col))
-        return true;
+      if(board.state[row][col] != null && board.state[row][col].color != this.color) return true ;
       if (firstMove == true)
         firstMove = false;
       else if (enPassant)
         enPassant = false;
+      return false;
     }
 
     return false;
