@@ -807,7 +807,7 @@ class PawnPiece extends ChessPiece {
     if ((piece = board.state[row + direction][col]) != null && Math.abs(coldiff) == 1 && piece.path.contains("/pawn")) {
       PawnPiece pawnPiece = (PawnPiece) piece;
       if (pawnPiece.color != this.color && Game.moveNumber - pawnPiece.lastMoveNumber == 1
-          && pawnPiece.enPassant == true) {
+          && pawnPiece.enPassant == true && this.row == (color?3:4)) {
         board.remove(row + direction, col);
         return true;
       }
