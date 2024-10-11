@@ -12,6 +12,7 @@ public class Main {
     JFrame chat = new JFrame("chat");
     JFrame chess = new JFrame("Chess");
     MainPanel boardPanel = new MainPanel();
+    boardPanel.setLayout(null);
     boardPanel.setBorder(BorderFactory.createMatteBorder(5, 5, 5, 5, new Color(0, 0, 0)));
     chess.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     chat.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -179,6 +180,9 @@ class Game implements Runnable {
 
   public void render(Graphics2D g2d) {
     board.draw(g2d);
+    if(board.showPromotionWindow){
+      // board.drawPromotionWindow(g2d);
+    }
     drawPieces(g2d);
   }
 
@@ -218,6 +222,22 @@ class Game implements Runnable {
 
 }
 
+class Promotion extends JPanel {
+
+  public boolean showPromotionWindow = false;
+  public int row, col ;
+
+  public void drawPromotionWindow(Graphics2D g2d){
+    if (row == 0){
+      int y = 0 ;
+
+    }
+    else if (row == 7){
+      
+    }
+  }
+}
+
 class Board {
 
   public static final int SQUARE_SIZE = 120;
@@ -231,6 +251,7 @@ class Board {
   public boolean whiteCheck = true;
   public int activeBlockCol;
   public int activeBlockRow;
+  public boolean showPromotionWindow = false;
 
   public Board(ArrayList<ChessPiece> pieces) {
     this.pieces = pieces;
@@ -306,6 +327,13 @@ class Board {
       }
     }
   }
+
+  // public void drawPromotionWindow(int row, int col, Graphics2D g2d){
+  //   int y = row * Board.SQUARE_SIZE + Board.SQUARE_SIZE/2 ;
+  //   int x = col * Board.SQUARE_SIZE + Board.SQUARE_SIZE/2 ;
+  //   g2d.setColor(Color.CYAN) ;
+  //   g2d.fillRect(x, y, Board.SQUARE_SIZE/2,  2*Board.SQUARE_SIZE) ;    
+  // }
 }
 
 abstract class ChessPiece {
@@ -362,11 +390,15 @@ abstract class ChessPiece {
       this.update(row, col);
       this.board.state[cur_row][cur_col]= null;
       ChessPiece g = this.board.state[row][col];
+      pieces.remove(g);
       this.board.state[row][col] = this;
       if(k.inCheck(pieces)) {
         this.update(cur_row, cur_col);
         this.board.state[cur_row][cur_col]= this;
         this.board.state[row][col] = g;
+        if(g != null){
+        pieces.add(g);
+        }
         return false;
       }
       this.board.state[cur_row][cur_col]= this;
