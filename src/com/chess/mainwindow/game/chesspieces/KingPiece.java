@@ -23,7 +23,6 @@ public class KingPiece extends ChessPiece {
   }
 
   public boolean checkMate(ArrayList<ChessPiece> pieces){
-    synchronized(pieces){
     for(ChessPiece p : pieces){
       if(p.color != this.color) continue ;
       p.storePossibleMoves();
@@ -32,8 +31,7 @@ public class KingPiece extends ChessPiece {
       }
     }
     return true ;
-      
-    }
+    
   }
 
   public boolean canCastle(int row, int col) {

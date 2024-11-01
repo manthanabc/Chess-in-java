@@ -3,6 +3,7 @@ package com.chess.mainwindow.game.chesspieces ;
 import java.util.ArrayList ;
 import javax.swing.* ;
 import java.awt.* ;
+import java.util.concurrent.locks.* ;
 import com.chess.mainwindow.game.board.*  ;
 
 public abstract class ChessPiece {
@@ -17,6 +18,7 @@ public abstract class ChessPiece {
   public Board board;
   public ArrayList<int[]> possibleMoves = null ; 
   public ArrayList<ChessPiece> pieces ;
+  private Lock lock = new ReentrantLock() ;
 
   public ChessPiece(boolean color, int row, int col, Board board, ArrayList<ChessPiece> pieces) {
     this.board = board;
@@ -34,15 +36,39 @@ public abstract class ChessPiece {
   }
 
   public void storePossibleMoves(){
+    // lock.lock();
+
+    //   System.out.println("after lock") ;
+    //   try{
+    //   Thread.sleep(1000) ;
+    //   }
+    //   catch(Exception e){
+    //     e.printStackTrace();
+    //   }
     this.possibleMoves = new ArrayList<int[]>() ;
     for(int i = 0 ; i < Board.MAX_ROW ; i++){
       for(int j = 0 ; j < Board.MAX_COL ; j++){
-        System.out.println(i + "  "+ j) ;
-        if(this.canMove(i, j, pieces, true)){
+        // System.out.println(i + "  "+ j) ;
+        if(this.canMove(i, j, pieces, true)){ //DO: solve the concurrency issue caused by can Move 
+                                              //    since it adds and removes the elements in the arraylist to simmulate move
           possibleMoves.add(new int[]{i,j}) ;
         }
       }
     }
+    //   System.out.println("before unlock") ;
+    //   try{
+    //     Thread.sleep(1000) ;
+    //   }catch(Exception e){
+    //     e.printStackTrace();
+    //   }
+    // lock.unlock();
+    //   System.out.println("after unlock") ;
+    //   try{
+    //   Thread.sleep(1000) ;
+    //   }catch(Exception e){
+    //     e.printStackTrace();
+    //   }
+    //   System.out.println("will this exe") ;
   }
 
   public boolean isPosition(int y, int x) {
@@ -76,11 +102,11 @@ public abstract class ChessPiece {
       ChessPiece g = this.board.state[row][col];
       this.update(row, col);
       this.board.state[cur_row][cur_col]= null;
-      pieces.remove(g);
+      // pieces.remove(g); //DO: remove this comment
       this.board.state[row][col] = this;
       if(k.inCheck(pieces)) {
         if(g != null){
-          pieces.add(g);
+          // pieces.add(g); //DO: remove this comment too
         }
         this.update(cur_row, cur_col);
         this.board.state[cur_row][cur_col]= this;
@@ -88,7 +114,7 @@ public abstract class ChessPiece {
         return false;
       }
       if(g != null){
-        pieces.add(g);
+        // pieces.add(g);  //DO: remove this comment too
       }
       this.board.state[cur_row][cur_col]= this;
       this.board.state[row][col] = g;
@@ -119,7 +145,9 @@ public abstract class ChessPiece {
   }
 
   public void draw(Graphics2D g2d) {
+    // lock.lock();
     g2d.drawImage(image, x, y, null);
+    // lock.unlock();
   }
 
   public int getCol(int x) {

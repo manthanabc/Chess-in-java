@@ -3,6 +3,7 @@ package com.chess.mainwindow.game ;
 import java.util.ArrayList ;
 import javax.swing.* ;
 import java.awt.* ;
+import java.util.concurrent.locks.*;
 import com.chess.mainwindow.game.chesspieces.* ;
 import com.chess.mainwindow.game.board.* ;
 import com.chess.mainwindow.* ;
@@ -23,6 +24,7 @@ public class Game implements Runnable {
   public MainPanel boardPanel;
   public KingPiece whiteKing ;
   public KingPiece blackKing ;
+  public Lock lock = new ReentrantLock() ;
 
   public Game(MainPanel boardPanel, MyMouse mouse) {
     this.mouse = mouse;
@@ -40,7 +42,11 @@ public class Game implements Runnable {
   }
 
   public void init() {
-    setPieces();
+    try{
+      setPieces();
+    }catch(Exception e){
+      e.printStackTrace();
+    }
   }
 
   public void setPieces() {
@@ -93,10 +99,19 @@ public class Game implements Runnable {
       board.state[7][2] = p;
       pieces.add(p = new BishopPiece(color, 7, 5, board, pieces));
       board.state[7][5] = p;
-      // for(ChessPiece pi : pieces){
-      //   pi.storePossibleMoves();
-      // }
+      try{
+      Thread.sleep(1000) ;
+      }catch(Exception e){
+        e.printStackTrace();
+      }
     }
+      // System.out.println("aaj omellete nahi banauga 1") ;
+      lock.lock() ;
+      for(ChessPiece pi : pieces){
+        pi.storePossibleMoves();
+      }
+      lock.unlock() ;
+      // System.out.println("aaj omellete nahi banauga ") ;
 
   }
 
@@ -122,10 +137,10 @@ public class Game implements Runnable {
           activePiece.lastMoveNumber = Game.moveNumber;
           Game.moveNumber++;
           // System.out.println("hello brother how are you?");
-          // if(blackKing.checkMate(pieces)){
+          // if(blackKing.inCheck(pieces) && blackKing.checkMate(pieces)){
           //   System.out.println("white wins") ;
           // }
-          // else if(whiteKing.checkMate(pieces)){
+          // else if(whiteKing.inCheck(pieces) && whiteKing.checkMate(pieces)){
           //   System.out.println("black wins") ;
           // }
         } else {
@@ -151,13 +166,19 @@ public class Game implements Runnable {
   }
 
   public void drawPieces(Graphics2D g2d) {
-    synchronized (pieces) {
+    // System.out.println("aaj omellete nahi banauga 2") ;
+    lock.lock() ;
+    // System.out.println("aaj omellete nahi banauga 3") ;
+    synchronized(pieces){
+      System.out.println("hello there");
+      System.out.println("there hello blahy blah") ;
       for (ChessPiece piece : pieces) {
         piece.draw(g2d);
       }
       if (activePiece != null)
         activePiece.draw(g2d);
     }
+    lock.unlock() ;
   }
 
   public void run() {

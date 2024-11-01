@@ -6,6 +6,8 @@ import com.chess.mainwindow.game.* ;
 import com.chess.mainwindow.game.board.* ;
 import com.chess.mainwindow.game.chesspieces.* ;
 
+
+
 public class PawnPiece extends ChessPiece {
   public boolean firstMove = true;
   public boolean enPassant = false;
@@ -91,3 +93,4 @@ public class PawnPiece extends ChessPiece {
     return false;
   }
 }
+
