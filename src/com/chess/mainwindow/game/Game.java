@@ -52,7 +52,7 @@ public class Game implements Runnable {
   public void setPieces() {
     boolean color;
     ChessPiece p;
-    synchronized (pieces) {
+    lock.lock();
       color = false; // set white pieces
       for (int i = 0; i < Board.MAX_COL; i++) { // set white pawns
         p = new PawnPiece(color, 1, i, board, pieces);
@@ -100,13 +100,11 @@ public class Game implements Runnable {
       pieces.add(p = new BishopPiece(color, 7, 5, board, pieces));
       board.state[7][5] = p;
       try{
-      Thread.sleep(1000) ;
+        Thread.sleep(1000) ;
       }catch(Exception e){
         e.printStackTrace();
       }
-    }
       // System.out.println("aaj omellete nahi banauga 1") ;
-      lock.lock() ;
       for(ChessPiece pi : pieces){
         pi.storePossibleMoves();
       }
@@ -136,13 +134,13 @@ public class Game implements Runnable {
           turn = !turn;
           activePiece.lastMoveNumber = Game.moveNumber;
           Game.moveNumber++;
-          // System.out.println("hello brother how are you?");
-          // if(blackKing.inCheck(pieces) && blackKing.checkMate(pieces)){
-          //   System.out.println("white wins") ;
-          // }
-          // else if(whiteKing.inCheck(pieces) && whiteKing.checkMate(pieces)){
-          //   System.out.println("black wins") ;
-          // }
+          System.out.println("hello brother how are you?");
+          if(blackKing.inCheck(pieces) && blackKing.checkMate(pieces)){
+            System.out.println("white wins") ;
+          }
+          else if(whiteKing.inCheck(pieces) && whiteKing.checkMate(pieces)){
+            System.out.println("black wins") ;
+          }
         } else {
           activePiece.originalPosition();
         }
@@ -157,17 +155,19 @@ public class Game implements Runnable {
   }
 
   public void render(Graphics2D g2d) {
+    // lock.lock();
     board.draw(g2d);
     if(board.showPromotionWindow){
       // board.drawPromotionWindow(g2d);
     }
     // boardPanel.promotion.drawPromotionWindow(g2d);
     drawPieces(g2d);
+    // lock.unlock();
   }
 
   public void drawPieces(Graphics2D g2d) {
     // System.out.println("aaj omellete nahi banauga 2") ;
-    lock.lock() ;
+    // lock.lock() ;
     // System.out.println("aaj omellete nahi banauga 3") ;
       // System.out.println("hello there");
       // System.out.println("there hello blahy blah") ;
@@ -177,14 +177,14 @@ public class Game implements Runnable {
       if (activePiece != null)
         activePiece.draw(g2d);
    
-    lock.unlock() ;
+    // lock.unlock() ;
   }
 
   public void run() {
     init();
     long startTime;
     long renderTime;
-
+    lock.lock();
     while (running) {
       startTime = System.currentTimeMillis();
       // update
@@ -202,6 +202,7 @@ public class Game implements Runnable {
 
       }
     }
+    lock.unlock();
   }
 
 }

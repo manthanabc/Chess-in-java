@@ -29,6 +29,9 @@ public class KingPiece extends ChessPiece {
       if(p.possibleMoves.isEmpty()){
         return false ;
       }
+      for() {
+        
+      }
     }
     return true ;
     
