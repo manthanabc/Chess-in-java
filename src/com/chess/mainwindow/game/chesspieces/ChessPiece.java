@@ -45,6 +45,7 @@ public abstract class ChessPiece {
     //   catch(Exception e){
     //     e.printStackTrace();
     //   }
+    // lock.lock();
     this.possibleMoves = new ArrayList<int[]>() ;
     for(int i = 0 ; i < Board.MAX_ROW ; i++){
       for(int j = 0 ; j < Board.MAX_COL ; j++){
@@ -69,6 +70,7 @@ public abstract class ChessPiece {
     //     e.printStackTrace();
     //   }
     //   System.out.println("will this exe") ;
+    // lock.unlock();
   }
 
   public boolean isPosition(int y, int x) {
@@ -87,8 +89,8 @@ public abstract class ChessPiece {
 
   abstract public boolean moveRules(int row, int col) ;
 
-  public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces, boolean r) {
-
+  public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces_orignal, boolean r) {
+    ArrayList<ChessPiece> pieces = new ArrayList<>(pieces_orignal);
     KingPiece k = null;
     for(ChessPiece p : pieces ) {
       if(p.path.contains("king") && p.color == this.color) {
@@ -111,6 +113,7 @@ public abstract class ChessPiece {
         this.update(cur_row, cur_col);
         this.board.state[cur_row][cur_col]= this;
         this.board.state[row][col] = g;
+        // lock.unlock();
         return false;
       }
       if(g != null){

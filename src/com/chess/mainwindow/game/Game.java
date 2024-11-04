@@ -42,11 +42,13 @@ public class Game implements Runnable {
   }
 
   public void init() {
+    lock.lock();
     try{
       setPieces();
     }catch(Exception e){
       e.printStackTrace();
     }
+    lock.unlock();
   }
 
   public void setPieces() {
@@ -108,7 +110,6 @@ public class Game implements Runnable {
         pi.storePossibleMoves();
       }
       // System.out.println("aaj omellete nahi banauga ") ;
-
   }
 
   public void update() {
@@ -153,14 +154,14 @@ public class Game implements Runnable {
   }
 
   public void render(Graphics2D g2d) {
-    // lock.lock();
+    lock.lock();
     board.draw(g2d);
     if(board.showPromotionWindow){
       // board.drawPromotionWindow(g2d);
     }
     // boardPanel.promotion.drawPromotionWindow(g2d);
     drawPieces(g2d);
-    // lock.unlock();
+    lock.unlock();
   }
 
   public void drawPieces(Graphics2D g2d) {
@@ -186,6 +187,7 @@ public class Game implements Runnable {
       startTime = System.currentTimeMillis();
       // update
       update();
+      
       // render
       boardPanel.repaint();
       renderTime = System.currentTimeMillis() - startTime;
@@ -200,5 +202,4 @@ public class Game implements Runnable {
       }
     }
   }
-
 }

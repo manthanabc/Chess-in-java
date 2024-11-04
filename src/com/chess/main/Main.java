@@ -13,6 +13,7 @@ public class Main {
     MainPanel boardPanel = new MainPanel();
     boardPanel.setLayout(null);
     boardPanel.setBorder(BorderFactory.createMatteBorder(5, 5, 5, 5, new Color(0, 0, 0)));
+    boardPanel.launchClient();
     chess.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     chat.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     chess.setResizable(false);
@@ -21,7 +22,6 @@ public class Main {
     chess.pack();
     chess.setLocationRelativeTo(null);
     chess.setVisible(true);
-    boardPanel.launchClient();
   }
 
 }
