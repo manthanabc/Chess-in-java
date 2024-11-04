@@ -5,6 +5,7 @@ import javax.swing.* ;
 import java.awt.* ;
 import java.util.concurrent.locks.* ;
 import com.chess.mainwindow.game.board.*  ;
+import java.util.Collections;
 
 public abstract class ChessPiece {
 
@@ -90,7 +91,13 @@ public abstract class ChessPiece {
   abstract public boolean moveRules(int row, int col) ;
 
   public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces_orignal, boolean r) {
-    ArrayList<ChessPiece> pieces = new ArrayList<>(pieces_orignal);
+    ArrayList<ChessPiece> pieces = new ArrayList<ChessPiece>(); //= new ArrayList<>(pieces_orignal);
+    // Collections.copy(pieces, pieces_orignal);
+    // Create deep copies of each piece
+    for (ChessPiece piece : pieces_orignal) {
+        pieces.add(piece);  // Use the copy constructor
+    }
+
     KingPiece k = null;
     for(ChessPiece p : pieces ) {
       if(p.path.contains("king") && p.color == this.color) {
