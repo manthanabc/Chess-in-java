@@ -52,7 +52,6 @@ public class Game implements Runnable {
   public void setPieces() {
     boolean color;
     ChessPiece p;
-    lock.lock();
       color = false; // set white pieces
       for (int i = 0; i < Board.MAX_COL; i++) { // set white pawns
         p = new PawnPiece(color, 1, i, board, pieces);
@@ -100,7 +99,7 @@ public class Game implements Runnable {
       pieces.add(p = new BishopPiece(color, 7, 5, board, pieces));
       board.state[7][5] = p;
       try{
-        Thread.sleep(1000) ;
+        // Thread.sleep(1000) ;
       }catch(Exception e){
         e.printStackTrace();
       }
@@ -108,7 +107,6 @@ public class Game implements Runnable {
       for(ChessPiece pi : pieces){
         pi.storePossibleMoves();
       }
-      lock.unlock() ;
       // System.out.println("aaj omellete nahi banauga ") ;
 
   }
@@ -184,7 +182,6 @@ public class Game implements Runnable {
     init();
     long startTime;
     long renderTime;
-    lock.lock();
     while (running) {
       startTime = System.currentTimeMillis();
       // update
@@ -202,7 +199,6 @@ public class Game implements Runnable {
 
       }
     }
-    lock.unlock();
   }
 
 }
