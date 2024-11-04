@@ -169,15 +169,14 @@ public class Game implements Runnable {
     // System.out.println("aaj omellete nahi banauga 2") ;
     lock.lock() ;
     // System.out.println("aaj omellete nahi banauga 3") ;
-    synchronized(pieces){
-      System.out.println("hello there");
-      System.out.println("there hello blahy blah") ;
+      // System.out.println("hello there");
+      // System.out.println("there hello blahy blah") ;
       for (ChessPiece piece : pieces) {
         piece.draw(g2d);
       }
       if (activePiece != null)
         activePiece.draw(g2d);
-    }
+   
     lock.unlock() ;
   }
 

@@ -102,11 +102,11 @@ public abstract class ChessPiece {
       ChessPiece g = this.board.state[row][col];
       this.update(row, col);
       this.board.state[cur_row][cur_col]= null;
-      // pieces.remove(g); //DO: remove this comment
+      pieces.remove(g); //DO: remove this comment
       this.board.state[row][col] = this;
       if(k.inCheck(pieces)) {
         if(g != null){
-          // pieces.add(g); //DO: remove this comment too
+          pieces.add(g); //DO: remove this comment too
         }
         this.update(cur_row, cur_col);
         this.board.state[cur_row][cur_col]= this;
@@ -114,7 +114,7 @@ public abstract class ChessPiece {
         return false;
       }
       if(g != null){
-        // pieces.add(g);  //DO: remove this comment too
+        pieces.add(g);  //DO: remove this comment too
       }
       this.board.state[cur_row][cur_col]= this;
       this.board.state[row][col] = g;
