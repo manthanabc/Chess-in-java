@@ -17,6 +17,7 @@ public class PawnPiece extends ChessPiece {
     super(color, row, col, board, pieces);
     this.path = "./../assets/pieces/" + pathColor + "/pawn" + ".png";
     this.image = new ImageIcon(path).getImage();
+    this.direction = row == 6 ? 1 : -1 ;
   }
 
   public boolean isBlocked(int row, int col) {
@@ -37,11 +38,40 @@ public class PawnPiece extends ChessPiece {
     return true ;
   }
 
+  public void promote(){
+    int choice = -1 ;
+    while(choice == -1){
+      String[] options = {"Rook", "Knight", "Queen", "Bishop"};   
+      choice = JOptionPane.showOptionDialog( null, "Choose a piece:", "Piece Selection", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+
+      switch(choice){
+        case 0:
+          pieces.add(board.state[row][col] = new RookPiece(this.color,row,col,this.board,pieces)) ;
+          pieces.remove(this) ;
+          break;
+        case 1:
+          pieces.add(board.state[row][col] = new KnightPiece(this.color,row,col,this.board,pieces)) ;
+          pieces.remove(this) ;
+          break;
+        case 2:
+          pieces.add(board.state[row][col] = new QueenPiece(this.color,row,col,this.board,pieces)) ;
+          pieces.remove(this) ;
+          break;
+        case 3:
+          pieces.add(board.state[row][col] = new BishopPiece(this.color,row,col,this.board,pieces)) ;
+          pieces.remove(this) ;
+          break;
+      }
+    }
+
+    Game.promotionFlag = false ;
+  }
+
   public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces, boolean r) {
     if(!super.canMove(row, col, pieces, r)) return false;
     int rowdiff = this.row - row;
     int coldiff = this.col - col;
-    direction = color ? 1 : -1;
+    // direction = color ? 1 : -1;
     ChessPiece piece;
     if(row + direction < 0 || row+direction > 7 ) return false ;
 
@@ -64,6 +94,9 @@ public class PawnPiece extends ChessPiece {
       if (row == (color?0:7)){
         //DO: promote pawn        
       }
+      if(row == (this.direction == 1 ? 0 : 7) ){
+        Game.promotionFlag = true ;
+      }
       return true;
     }
 
@@ -79,10 +112,15 @@ public class PawnPiece extends ChessPiece {
 
     if (rowdiff == direction && Math.abs(coldiff) == 1) {
       // DO: if opponent piece available return true else return false
-      if(board.state[row][col] != null && board.state[row][col].color != this.color) return true ;
-      if (row == (color?0:7)){
-        //DO: promote pawn        
-      }
+      if(board.state[row][col] != null && board.state[row][col].color != this.color){
+        if(row == (this.direction == 1 ? 0 : 7) ){
+          Game.promotionFlag = true ;
+        }
+        return true ;
+      } 
+      // if (row == (color?0:7)){
+      //   //DO: promote pawn        
+      // }
       // if (firstMove == true)
       //   firstMove = false;
       if (enPassant)

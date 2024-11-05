@@ -25,6 +25,7 @@ public class Game implements Runnable {
   public KingPiece whiteKing ;
   public KingPiece blackKing ;
   public Lock lock = new ReentrantLock() ;
+  public static boolean promotionFlag = false ;
 
   public Game(MainPanel boardPanel, MyMouse mouse) {
     this.mouse = mouse;
@@ -147,6 +148,11 @@ public class Game implements Runnable {
           pieces.remove(board.enemyPieceAtPosition(mouse.y, mouse.x, turn));
           board.updateActiveBlock(mouse.y, mouse.x);
           turn = !turn;
+          boardPanel.repaint() ;
+          if(promotionFlag == true){
+            PawnPiece pawn = (PawnPiece)activePiece ;
+            pawn.promote() ;
+          }
           activePiece.lastMoveNumber = Game.moveNumber;
           Game.moveNumber++;
           if(blackKing.checkMate(pieces)){
