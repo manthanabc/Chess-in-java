@@ -37,41 +37,16 @@ public abstract class ChessPiece {
   }
 
   public void storePossibleMoves(){
-    // lock.lock();
-
-    //   System.out.println("after lock") ;
-    //   try{
-    //   Thread.sleep(1000) ;
-    //   }
-    //   catch(Exception e){
-    //     e.printStackTrace();
-    //   }
-    // lock.lock();
     this.possibleMoves = new ArrayList<int[]>() ;
+    System.out.println("possible moves of " + this.path) ;
     for(int i = 0 ; i < Board.MAX_ROW ; i++){
       for(int j = 0 ; j < Board.MAX_COL ; j++){
-        // System.out.println(i + "  "+ j) ;
         if(this.canMove(i, j, pieces, true)){ //DO: solve the concurrency issue caused by can Move 
-                                              //    since it adds and removes the elements in the arraylist to simmulate move
+          System.out.println(i + "  "+ j) ;
           possibleMoves.add(new int[]{i,j}) ;
         }
       }
     }
-    //   System.out.println("before unlock") ;
-    //   try{
-    //     Thread.sleep(1000) ;
-    //   }catch(Exception e){
-    //     e.printStackTrace();
-    //   }
-    // lock.unlock();
-    //   System.out.println("after unlock") ;
-    //   try{
-    //   Thread.sleep(1000) ;
-    //   }catch(Exception e){
-    //     e.printStackTrace();
-    //   }
-    //   System.out.println("will this exe") ;
-    // lock.unlock();
   }
 
   public boolean isPosition(int y, int x) {
@@ -91,6 +66,8 @@ public abstract class ChessPiece {
   abstract public boolean moveRules(int row, int col) ;
 
   public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces_orignal, boolean r) {
+    if(board.friendlyPieceAtPosition(row * Board.SQUARE_SIZE, col * Board.SQUARE_SIZE,this.color) != null) 
+      return false ;
     ArrayList<ChessPiece> pieces = new ArrayList<ChessPiece>(); //= new ArrayList<>(pieces_orignal);
     // Collections.copy(pieces, pieces_orignal);
     // Create deep copies of each piece

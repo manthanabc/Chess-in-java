@@ -44,7 +44,6 @@ public class PawnPiece extends ChessPiece {
     direction = color ? 1 : -1;
     ChessPiece piece;
     if(row + direction < 0 || row+direction > 7 ) return false ;
-    System.out.println("NOT REQCHED 47");
 
     if ((piece = board.state[row + direction][col]) != null && Math.abs(coldiff) == 1 && piece.path.contains("/pawn")) {
       PawnPiece pawnPiece = (PawnPiece) piece;
@@ -54,7 +53,6 @@ public class PawnPiece extends ChessPiece {
         return true;
       }
     }
-    System.out.println("NOT REQCHED 56");
 
     if (rowdiff == direction && coldiff == 0) {
       if (isBlocked(this.row - direction, col))
@@ -73,7 +71,6 @@ public class PawnPiece extends ChessPiece {
       // DO: check blocked or not
       if (isBlocked(this.row - direction, col) || isBlocked(this.row - 2 * direction, col))
         return false;
-      System.out.println("NOT REQCHED 74");
       if (!enPassant && firstMove)
         enPassant = true;
       // firstMove = false;

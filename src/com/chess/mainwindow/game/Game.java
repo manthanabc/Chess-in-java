@@ -54,14 +54,14 @@ public class Game implements Runnable {
   public void setPieces() {
     boolean color;
     ChessPiece p;
-      color = false; // set white pieces
-      for (int i = 0; i < Board.MAX_COL; i++) { // set white pawns
+      color = false; // set black pieces
+      for (int i = 0; i < Board.MAX_COL; i++) { // set black pawns
         p = new PawnPiece(color, 1, i, board, pieces);
         pieces.add(p);
         board.state[1][i] = p;
       }
       pieces.add(p = new KingPiece(color, 0, 4, board, pieces));
-      whiteKing = (KingPiece)p ;
+      blackKing = (KingPiece)p ;
       board.state[0][4] = p;
       pieces.add(p = new QueenPiece(color, 0, 3, board, pieces));
       board.state[0][3] = p;
@@ -77,14 +77,14 @@ public class Game implements Runnable {
       board.state[0][2] = p;
       pieces.add(p = new BishopPiece(color, 0, 5, board, pieces));
       board.state[0][5] = p;
-      color = true; // set black pieces
-      for (int i = 0; i < Board.MAX_COL; i++) { // set black pawns
+      color = true; // set white pieces
+      for (int i = 0; i < Board.MAX_COL; i++) { // set white pawns
         p = new PawnPiece(color, 6, i, board, pieces);
         pieces.add(p);
         board.state[6][i] = p;
       }
       pieces.add(p = new KingPiece(color, 7, 4, board, pieces));
-      blackKing = (KingPiece)p ;
+      whiteKing = (KingPiece)p ;
       board.state[7][4] = p;
       pieces.add(p = new QueenPiece(color, 7, 3, board, pieces));
       board.state[7][3] = p;
@@ -100,15 +100,27 @@ public class Game implements Runnable {
       board.state[7][2] = p;
       pieces.add(p = new BishopPiece(color, 7, 5, board, pieces));
       board.state[7][5] = p;
-      try{
-        // Thread.sleep(1000) ;
-      }catch(Exception e){
-        e.printStackTrace();
-      }
+
+      // for(int i = 0 ; i < Board.MAX_ROW ; i++) {
+      //   for(int j = 0 ; j < Board.MAX_COL ; j++){
+      //     if(board.pieceAtPosition(i*Board.SQUARE_SIZE,j*Board.SQUARE_SIZE ) != null){
+      //       System.out.print("1") ;
+      //     } else {
+      //       System.out.print("0") ;
+      //     }
+      //     System.out.print(" ") ;
+      //   }
+      //   System.out.println("") ;
+      // }
+      // try{
+      //   // Thread.sleep(1000) ;
+      // }catch(Exception e){
+      //   e.printStackTrace();
+      // }
       // System.out.println("aaj omellete nahi banauga 1") ;
-      for(ChessPiece pi : pieces){
-        pi.storePossibleMoves();
-      }
+      // for(ChessPiece pi : pieces){
+      //   pi.storePossibleMoves();
+      // }
       // System.out.println("aaj omellete nahi banauga ") ;
   }
 
@@ -125,29 +137,28 @@ public class Game implements Runnable {
         }
       }
       if (!mouse.pressed && check) {
-        if (board.friendlyPieceAtPosition(mouse.y, mouse.x, turn) == null
-            && activePiece.canMove(activePiece.getRow(mouse.y), activePiece.getCol(mouse.x), pieces, true)) {
+        if (/*board.friendlyPieceAtPosition(mouse.y, mouse.x, turn) == null
+            &&*/ activePiece.canMove(activePiece.getRow(mouse.y), activePiece.getCol(mouse.x), pieces, true)) {
           activePiece.update(activePiece.getRow(mouse.y), activePiece.getCol(mouse.x));
+          if(activePiece.path.contains("pawn")){
+            PawnPiece temp = (PawnPiece) activePiece ; 
+            temp.firstMove = false ;
+          }
           pieces.remove(board.enemyPieceAtPosition(mouse.y, mouse.x, turn));
           board.updateActiveBlock(mouse.y, mouse.x);
           turn = !turn;
           activePiece.lastMoveNumber = Game.moveNumber;
           Game.moveNumber++;
-          System.out.println("hello brother how are you?");
-          if(blackKing.inCheck(pieces) && blackKing.checkMate(pieces)){
+          if(blackKing.checkMate(pieces)){
             System.out.println("white wins") ;
           }
-          else if(whiteKing.inCheck(pieces) && whiteKing.checkMate(pieces)){
+          else if( whiteKing.checkMate(pieces)){
             System.out.println("black wins") ;
           }
         } else {
           activePiece.originalPosition();
         }
         check = false;
-        if(activePiece.path.contains("pawn")){
-          PawnPiece temp = (PawnPiece) activePiece ; 
-          temp.firstMove = false ;
-        }
         activePiece = null;
       }
 

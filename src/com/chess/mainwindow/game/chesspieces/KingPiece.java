@@ -1,8 +1,9 @@
-package com.chess.mainwindow.game.chesspieces ;
+package com.chess.mainwindow.game.chesspieces;
 
-import java.util.ArrayList ;
-import javax.swing.* ;
-import com.chess.mainwindow.game.board.* ;
+import java.util.ArrayList;
+import javax.swing.*;
+import com.chess.mainwindow.game.board.*;
+import com.chess.mainwindow.game.chesspieces.ChessPiece;
 
 public class KingPiece extends ChessPiece {
 
@@ -22,16 +23,32 @@ public class KingPiece extends ChessPiece {
     return false;
   }
 
-  public boolean checkMate(ArrayList<ChessPiece> pieces){
-    for(ChessPiece p : pieces){
-      if(p.color != this.color) continue ;
+  public boolean checkMate(ArrayList<ChessPiece> pieces) {
+    for (ChessPiece p : pieces) {
+      if (p.color != this.color)
+        continue;
       p.storePossibleMoves();
-      if(p.possibleMoves.isEmpty()){
+      if(!p.possibleMoves.isEmpty()){
+        System.out.println("returned false for checkmate") ;
         return false ;
       }
     }
-    return true ;
-    
+    // for(ChessPiece p : pieces){
+    //   if(!p.possibleMoves.isEmpty() && p.color == this.color){
+    //     System.out.println("returned false for checkmate") ;
+    //     return false ;
+    //   }
+    // }
+
+    // for (ChessPiece p : pieces) {
+    //   if (p.color != this.color) {
+    //     continue ;
+    //   }
+    //   //DO: simulate the move and check if king still stays in check if he does for all possible moves then return true else false ;
+
+    // }
+    return true;
+
   }
 
   public boolean canCastle(int row, int col) {
@@ -61,18 +78,19 @@ public class KingPiece extends ChessPiece {
     return false;
   }
 
-  public boolean moveRules(int row, int col){
+  public boolean moveRules(int row, int col) {
     int rowdiff = this.row - row;
     int coldiff = this.col - col;
     if (!((Math.abs(rowdiff) | Math.abs(coldiff)) == 1))
       return false;
-    return true ;
+    return true;
   }
 
   public boolean canMove(int row, int col, ArrayList<ChessPiece> pieces, boolean r) {
-    if(!super.canMove(row, col, pieces, r)) return false;
-    if(!moveRules(row, col)) 
-      return false ;
+    if (!super.canMove(row, col, pieces, r))
+      return false;
+    if (!moveRules(row, col))
+      return false;
     if (canCastle(row, col))
       return true;
     return true;
