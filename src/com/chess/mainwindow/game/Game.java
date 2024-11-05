@@ -144,6 +144,10 @@ public class Game implements Runnable {
           activePiece.originalPosition();
         }
         check = false;
+        if(activePiece.path.contains("pawn")){
+          PawnPiece temp = (PawnPiece) activePiece ; 
+          temp.firstMove = false ;
+        }
         activePiece = null;
       }
 

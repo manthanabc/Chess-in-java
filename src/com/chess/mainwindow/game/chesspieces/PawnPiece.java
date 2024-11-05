@@ -59,9 +59,9 @@ public class PawnPiece extends ChessPiece {
     if (rowdiff == direction && coldiff == 0) {
       if (isBlocked(this.row - direction, col))
         return false;
-      if (firstMove == true)
-        firstMove = false;
-      else if (enPassant)
+      // if (firstmove == true)
+      //   firstmove = false;
+      if (enPassant)
         enPassant = false;
       if (row == (color?0:7)){
         //DO: promote pawn        
@@ -76,7 +76,7 @@ public class PawnPiece extends ChessPiece {
       System.out.println("NOT REQCHED 74");
       if (!enPassant && firstMove)
         enPassant = true;
-      firstMove = false;
+      // firstMove = false;
       return true;
     }
 
@@ -86,9 +86,9 @@ public class PawnPiece extends ChessPiece {
       if (row == (color?0:7)){
         //DO: promote pawn        
       }
-      if (firstMove == true)
-        firstMove = false;
-      else if (enPassant)
+      // if (firstMove == true)
+      //   firstMove = false;
+      if (enPassant)
         enPassant = false;
       return false;
     }
