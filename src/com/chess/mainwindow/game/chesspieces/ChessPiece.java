@@ -5,6 +5,7 @@ import javax.swing.* ;
 import java.awt.* ;
 import java.util.concurrent.locks.* ;
 import com.chess.mainwindow.game.board.*  ;
+import com.chess.mainwindow.game.* ; 
 import java.util.Collections;
 
 public abstract class ChessPiece {
@@ -47,6 +48,7 @@ public abstract class ChessPiece {
         }
       }
     }
+    Game.promotionFlag = false ;
   }
 
   public boolean isPosition(int y, int x) {
