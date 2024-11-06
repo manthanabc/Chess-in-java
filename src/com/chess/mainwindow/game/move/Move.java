@@ -25,4 +25,13 @@ public class Move implements Serializable{
   public int[] getcurrPosition(){
     return this.currPosition ;
   }
+
+  public void transform(){
+    //DO: transform prev
+    prevPosition[1] = 7 - prevPosition[1] ; 
+    prevPosition[0] = 7 - prevPosition[0] ;
+    //DO: transform curr
+    currPosition[1] = 7 - currPosition[1] ;
+    currPosition[0] = 7 - currPosition[0] ;
+  }
 }
