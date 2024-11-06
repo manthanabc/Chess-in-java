@@ -9,7 +9,7 @@ import com.chess.mainwindow.game.board.* ;
 import java.io.*;
 import java.net.*;
 
-class Move implements Serializable {
+private class Move implements Serializable {
     private int x;
     private int y;
 
@@ -69,25 +69,34 @@ public class MainPanel extends JPanel {
     try {
       System.out.println("connection established") ;
       System.out.println("Waiting for other player") ;
-      BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-
-      String message;
-      while ((message = reader.readLine()) != null) {
-        if(message.contains("black")) {
-          System.out.println("im black");
-          MainPanel.is_black = true;
-
-          ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
-          ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
-
-          Move move = new Move(0, 2);
-          outputStream.writeObject(move);
-          outputStream.flush();
-
-          System.out.println("Move sent: " + move);
-          //send a random move
+      try {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        String message;
+        while ((message = reader.readLine()) != null) {
+          if(message.contains("black")) {
+            System.out.println("im blackkk");
+            MainPanel.is_black = true;
+            System.out.println("TYA CREATE SRREAM");
+            break;
+          }
+          break;
         }
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+
+      if(true) {
+        System.out.println("TRYING TO SEND");
+        // ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
+        ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+
+        Move move = new Move(0, 2);
+        System.out.println("Move will sent: " + move);
+
+        outputStream.writeObject(move);
+        outputStream.flush();
+
+        System.out.println("Move sent: " + move);
       }
           
     } catch(Exception e) {
