@@ -63,7 +63,6 @@ public class PawnPiece extends ChessPiece {
           break;
       }
     }
-
     Game.promotionFlag = false ;
   }
 
