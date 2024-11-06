@@ -34,6 +34,23 @@ public class Server{
   }
 }
 
+class move implements Serializable {
+    private int x;
+    private int y;
+
+    public move(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    @Override
+    public String toString() {
+        return "Move{" +
+               "x=" + x +
+               ", y=" + y +
+               '}';
+    }
+}
 
 class GameServer implements Runnable{
   Socket whiteClient = null ;
@@ -50,23 +67,6 @@ class GameServer implements Runnable{
     init() ;
   }
 
-public class Move implements Serializable {
-    private int x;
-    private int y;
-
-    public Move(int x, int y) {
-        this.x = x;
-        this.y = y;
-    }
-
-    @Override
-    public String toString() {
-        return "Move{" +
-               "x=" + x +
-               ", y=" + y +
-               '}';
-    }
-}
 
 public void init(){
     System.out.println("TELLING COLORS");
@@ -98,8 +98,8 @@ public void init(){
       Object receivedObject; 
       while(true) {
         while ((receivedObject = whiteinputStream.readObject()) != null) {
-            if (receivedObject instanceof Move) {
-                Move move = (Move) receivedObject;
+            if (receivedObject instanceof move) {
+                move move = (move) receivedObject;
                 System.out.println("Received move: " + move);
 
                 blackoutputStream.writeObject(move);
@@ -108,8 +108,8 @@ public void init(){
             }
         }
         while ((receivedObject = blackinputStream.readObject()) != null) {
-            if (receivedObject instanceof Move) {
-                Move move = (Move) receivedObject;
+            if (receivedObject instanceof move) {
+                move move = (move) receivedObject;
                 System.out.println("Received move: " + move);
 
                 whiteoutputStream.writeObject(move);
